@@ -1,0 +1,17 @@
+# Export anniversaires Facebook vers fichier .ics
+
+Si vous souhaitez exporter les anniversaires de vos amis Facebook vers un fichier `.ics` éditable, quelques manipulations s’imposent.
+
+## Récupérer les informations depuis Facebook
+
+La première opération consiste à récupérer l’URL webcal disponible sur Facebook à l’adresse : `https://www.facebook.com/events/upcoming`
+
+La page devrait se présenter ainsi :
+
+image::face-ics-0.PNG[]
+
+Ce qui nous intéresse ici est le lien `Anniversaires` présent au bas droit de la page.
+
+L’URL devrait se présenter sous la forme : `webcal://www.facebook.com/ical/b.php?uid=1097591966&key=BADJcwSrroz0fpOv`
+
+Il ne reste plus qu’à copier ce lien, remplacer le préfixe `webcal://` par `http://` et enregistrer le fichier `.ics` ainsi produit.
