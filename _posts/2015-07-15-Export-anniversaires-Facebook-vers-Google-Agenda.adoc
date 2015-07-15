@@ -1,1 +1,3 @@
 # Export anniversaires Facebook vers Google Agenda
+
+Si vous souhaitez exporter les anniversaires de vos amis Facebook vers Google Agenda ou simplement un fichier .ics éditable, quelques manipulations s’imposent.
