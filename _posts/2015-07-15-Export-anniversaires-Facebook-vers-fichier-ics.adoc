@@ -1,5 +1,8 @@
 # Export anniversaires Facebook vers fichier .ics
 
+
+:hp-tags: ics, Facebook, webcal
+
 Si vous souhaitez exporter les anniversaires de vos amis Facebook vers un fichier `.ics` éditable, quelques manipulations s’imposent.
 
 ## Récupérer les informations depuis Facebook
