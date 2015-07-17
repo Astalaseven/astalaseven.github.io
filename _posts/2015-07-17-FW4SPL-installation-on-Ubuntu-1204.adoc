@@ -1,0 +1,153 @@
+# FW4SPL installation on Ubuntu 12.04
+
+
+## Folders creation
+
+```
+mkdir -p FW4SPL/{Dev,BinPkgs}/{Build,Src,Install}
+```
+
+
+## Dependencies download
+
+```bash
+cd FW4SPL/BinPkgs
+
+git clone https://github.com/fw4spl-org/fw4spl-deps.git
+git clone https://github.com/fw4spl-org/fw4spl-ar-deps.git
+git clone https://github.com/fw4spl-org/fw4spl-ext-deps.git
+```
+
+
+## Take latest dev branch
+
+```
+cd fw4spl-ext-deps
+git checkout origin/fw4spl_0.10.2
+
+cd ..
+
+cd fw4spl-ar-deps
+git checkout origin/fw4spl_0.10.2
+```
+
+
+## Compilation
+
+```
+cd ../fw4spl-deps/
+```
+
+if using ccmake:
+```
+ccmake CMakeLists.txt
+ADDITIONAL_DEPS  /home/asta/FW4SPL/BinPkgs/fw4spl-ar-deps;/home/asta/FW4SPL/BinPkgs/fw4spl-ext-deps
+CMAKE_BUILD_TYPE Debug (or Release)
+CMAKE_INSTALL_PREFIX /home/asta/FW4SPL/BinPkgs/Install/
+```
+
+else using cmake:
+```
+cmake -DADDITIONAL_DEPS="/home/asta/FW4SPL/BinPkgs/fw4spl-ar-deps;/home/asta/FW4SPL/BinPkgs/fw4spl-ext-deps" -DCMAKE_BUILD_TYPE="Debug" CMakeLists.txt
+```
+
+Root privileges are needed as it installs some files in `/usr/…`.
+
+```
+sudo make
+```
+
+### Issues
+
+#### Python download
+
+Python and other libs cannot be downloaded because `curl` does not support `https` protocol.
+You may want to get latest `curl` and compile it with `https` support.
+Other solution is to download the `.tgz` yourself and put it in `FW4SPL/BinPkgs/fw4spl-deps/archive`, or directly extract it in `FW4SPL/BinPkgs/fw4spl-deps/python/python-prefix/src`.
+
+```
+cd ~/FW4SPL/BinPkgs/fw4spl-deps/python/python-prefix/src
+wget https://www.python.org/ftp/python/2.7.8/Python-2.7.8.tgz
+tar xvf Python-2.7.8.tgz
+mv Python-2.7.8/ python
+```
+
+#### When `curl` is not the problem
+
+As the redirection seems blocking the `make` process, you can patch the `FW4SPL/BinPkgs/fw4spl-deps/python/CMakeLists.txt` file to directly try the https url.
+
+```diff
+index c27ca86..262952a 100644
+--- a/python/CMakeLists.txt
++++ b/python/CMakeLists.txt
+@@ -4,7 +4,7 @@ project(pythonBuilder)
+ 
+ include(ExternalProject)
+ 
+-getCachedUrl(http://www.python.org/ftp/python/2.7.8/Python-2.7.8.tgz CACHED_URL)
++getCachedUrl(https://www.python.org/ftp/python/2.7.8/Python-2.7.8.tgz CACHED_URL)
+ 
+ if(WIN32)
+     set(PYTHON_PATCH_DIR ${CMAKE_CURRENT_SOURCE_DIR}/patch)
+```
+
+#### Global python installation
+
+Not sure if related but after the `python` installation some programs stopped working (gedit, vim), you may want to reinstall python and those programs.
+
+//sudo apt-get install libc6
+
+#### If you compile on 32 bit system
+
+```diff
+diff --git a/boost/CMakeLists.txt b/boost/CMakeLists.txt
+index a321128..d5faf78 100644
+--- a/boost/CMakeLists.txt
++++ b/boost/CMakeLists.txt
+@@ -28,7 +28,7 @@ set(BOOST_ARGS
+     --without-test
+     variant=${BOOST_BUILD_TYPE}
+     link=shared
+-    address-model=64
++    address-model=32
+     threading=multi
+ )
+```
+
+#### Qt cannot found freetype headers
+
+Even if `freetype` is compiled before `qt`, it seems `qt` cannot found some headers.
+
+```
+[ 48%] Performing build step for 'qt'
+In file included from ../../include/QtGui/5.4.0/QtGui/private/qfontengine_ft_p.h:1:0,
+                 from fontdatabases/basic/qbasicfontdatabase.cpp:46:
+../../include/QtGui/5.4.0/QtGui/private/../../../../../src/gui/text/qfontengine_ft_p.h:50:22: fatal error: ft2build.h: Aucun fichier ou dossier de ce type
+ #include <ft2build.h>
+                      ^
+compilation terminated.
+make[6]: *** [.obj/qbasicfontdatabase.o] Erreur 1
+make[5]: *** [sub-platformsupport-make_first] Erreur 2
+make[4]: *** [sub-src-make_first] Erreur 2
+make[3]: *** [module-qtbase-make_first] Erreur 2
+make[2]: *** [qt/qt-prefix/src/qt-stamp/qt-build] Erreur 2
+make[1]: *** [qt/CMakeFiles/qt.dir/all] Erreur 2
+make: *** [all] Erreur 2
+```
+
+Solution is to link freetype files in `/usr/include` and relaunch the process:
+
+```
+sudo ln -s /usr/include/freetype2/* /usr/include/
+```
+
+
+
+
+
+
+
+
+
+
+
